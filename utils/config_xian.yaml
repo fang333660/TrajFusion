@@ -1,0 +1,82 @@
+data:
+  dataset: PKU_Tsinghua_LRA_Model_v3_Final
+  base_data_dir: 'E:\data\data_xian_didi'
+  #base_data_dir: '.\test_fanhua'
+  osm_graph_path: 'C:/Users/admin/Desktop/paper/ConditionControlDiffusionGenerateTrajectory/osm_path/graphml/pku_tsinghua_test_drive_service_highways_ox_richer_from_pbf_xian.graphml'
+  train_traj_file: 'train_coord.pt'
+  train_cond_file: 'train_cond.npy'
+  train_lra_file: 'train_lra_features.npy'
+
+  test_traj_file: 'test_coord.pt'
+  test_cond_file: 'test_cond.npy'
+  test_lra_file: 'test_lra_features.npy'
+  road_embedding_path: 'D:\ceshi\xian_node_embeddings2.pt'
+
+  traj_length: 200
+  channels: 2
+  num_workers: 0
+
+  norm:
+    lat_min: 34.22
+    lat_max: 34.27
+    lon_min: 108.92
+    lon_max: 108.97
+
+  num_grid_cells: 256
+  num_time_slots: 288
+  num_lra_road_type_classes: 8
+
+model:
+  type: simple
+  attr_dim: 8
+  attr_hidden_dim: 256
+  guidance_scale_train: 0.0
+
+  in_channels: 2
+  out_ch: 2
+  ch: 128
+  ch_mult: [1, 2, 2, 2]
+  num_res_blocks: 2
+  attn_resolutions: [128, 64, 32]
+  dropout: 0.3
+  var_type: 'fixedlarge'
+  ema: True
+  ema_rate: 0.9999
+  resamp_with_conv: True
+
+  use_local_road_awareness: True
+  local_road_feature_dim: 128
+  num_nearest_roads_query: 5
+  #lra_search_radius_deg: 0.0003
+  lra_small_radius_deg: 0.0002 # 小半径（约22米），用于精确贴合
+  lra_large_radius_deg: 0.0006 # 大半径（约66米），用于感知路口和环境
+
+diffusion:
+  beta_schedule: 'cosine'
+  num_diffusion_timesteps: 1000
+
+training:
+  batch_size: 16
+  n_epochs: 1000
+  lr: 0.0002
+  optimizer: 'AdamW'
+  weight_decay: 1.0e-4
+  grad_clip: 1.0
+  snapshot_freq: 10000
+  save_epoch_interval: 5
+  loss_type: 'l1'
+
+  smoothness_weight: 0.5
+  road_adherence_weight: 0.5
+  uncond_prob_cfg: 0.1
+
+  exp_base_dir: 'D:/AI_Experiments_LRA/DiffTraj_Runs'
+  device: 'cuda'
+
+  endpoint_loss_weight: 0.1
+  geom_loss_weight: 0.05
+
+sampling:
+  batch_size: 32
+  last_only: True
+  guidance_scale_sampling: 5.0
